@@ -7,7 +7,10 @@ const mongoose = require('mongoose');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // Set your frontend origin
+  credentials: true // Allow credentials (cookies, authorization headers)
+}));
 app.use(bodyParser.json());
 
 mongoose.connect('mongodb+srv://aminvasudev6:wcw9QsKgW3rUeGA4@waybillcluster.88jnvsg.mongodb.net/?retryWrites=true&w=majority&appName=waybillCluster', { useNewUrlParser: true, useUnifiedTopology: true });
