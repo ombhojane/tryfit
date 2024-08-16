@@ -1,164 +1,181 @@
-import React, { useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Phaser from 'phaser';
+import GameShop from './GameShop';
 
 function Playground() {
   const location = useLocation();
+  const navigate = useNavigate();
   const gameRef = useRef(null);
+  const gameInstance = useRef(null);
+  const [speed, setSpeed] = useState(200);
+  const [showShop, setShowShop] = useState(false);
+  const [currentShop, setCurrentShop] = useState(null);
 
   useEffect(() => {
     const config = {
       type: Phaser.AUTO,
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: '100%',
+      height: '100%',
       parent: gameRef.current,
       physics: {
         default: 'arcade',
         arcade: {
           gravity: { y: 0 },
           debug: false,
-        }
+        },
       },
       scene: {
         preload: preload,
         create: create,
-        update: update
+        update: update,
       },
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
-      }
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+      },
     };
 
     const game = new Phaser.Game(config);
+    gameInstance.current = game;
 
     let player;
     let cursors;
     let buildings;
-    let trees;
-    let roadsLayer;
-    let parksLayer;
-    let groundLayer;
-    let minimap;
+    let enterButton;
 
-    const WORLD_WIDTH = 3200;
-    const WORLD_HEIGHT = 3200;
+    const WORLD_WIDTH = 3840;
+    const WORLD_HEIGHT = 2560;
 
     function preload() {
       this.load.image('avatar', location.state.avatarImage);
-      this.load.image('tileset', 'assets/city_tileset.png');
-      this.load.tilemapTiledJSON('map', 'assets/city_map.json');
-      this.load.image('building1', 'assets/building1.png');
-      this.load.image('building2', 'assets/building2.png');
-      this.load.image('building3', 'assets/building3.png');
-      this.load.image('tree', 'assets/tree.png');
-      // Commenting out car loading
-      // this.load.image('car', 'assets/car.png');
+      this.load.image('background', '/assets/bgplayground.jpg');
+      this.load.image('enterButton', '/assets/tree.png');
     }
 
     function create() {
-      // Create the tilemap
-      const map = this.make.tilemap({ key: 'map' });
-      const tileset = map.addTilesetImage('city_tileset', 'tileset');
-      
-      if (!tileset) {
-        console.error("Tileset not found!");
-        return;
-      }
-
-      // Create layers
-      groundLayer = map.createLayer('Ground', tileset, 0, 0);
-      roadsLayer = map.createLayer('Roads', tileset, 0, 0);
-      parksLayer = map.createLayer('Parks', tileset, 0, 0);
-
-      // Set collision for layers
-      if (groundLayer) {
-        groundLayer.setCollisionByProperty({ collides: true });
-      } else {
-        console.error("groundLayer is null or not found in the tilemap");
-      }
-
-      if (roadsLayer) {
-        roadsLayer.setCollisionByProperty({ collides: true });
-      } else {
-        console.error("roadsLayer is null or not found in the tilemap");
-      }
-
-      if (parksLayer) {
-        parksLayer.setCollisionByProperty({ collides: true });
-      } else {
-        console.error("parksLayer is null or not found in the tilemap");
-      }
-
-      // Create buildings in a grid pattern
-      buildings = this.physics.add.staticGroup();
-      const buildingSpacingX = 300; // Adjust spacing for proper layout
-      const buildingSpacingY = 300;
-      const buildingScale = 0.3; // Smaller scale for buildings
-      for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-          const x = 200 + i * buildingSpacingX;
-          const y = 200 + j * buildingSpacingY;
-          const buildingType = Phaser.Math.Between(1, 3);
-          buildings.create(x, y, `building${buildingType}`).setScale(buildingScale).refreshBody();
-        }
-      }
-
-      // Create trees scattered around the city
-      trees = this.physics.add.staticGroup();
-      const treeScale = 0.10; // Smaller scale for trees
-      for (let i = 0; i < 20; i++) {
-        const x = Phaser.Math.Between(50, WORLD_WIDTH - 50);
-        const y = Phaser.Math.Between(50, WORLD_HEIGHT - 50);
-        trees.create(x, y, 'tree').setScale(treeScale).refreshBody();
-      }
+      // Add background
+      const background = this.add.image(0, 0, 'background');
+      background.setOrigin(0, 0);
+      background.setDisplaySize(WORLD_WIDTH, WORLD_HEIGHT);
 
       // Create player
       player = this.physics.add.sprite(WORLD_WIDTH / 2, WORLD_HEIGHT / 2, 'avatar');
       player.setCollideWorldBounds(true);
-      player.setScale(0.3); // Smaller scale for player
-
-      // Set up collisions
-      this.physics.add.collider(player, buildings);
-      this.physics.add.collider(player, trees);
-      this.physics.add.collider(player, groundLayer);
-      this.physics.add.collider(player, roadsLayer);
-      this.physics.add.collider(player, parksLayer);
+      player.setScale(0.3);
 
       cursors = this.input.keyboard.createCursorKeys();
 
-      // Set world bounds
       this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-      // Set up camera
       this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
       this.cameras.main.startFollow(player, true, 0.1, 0.1);
-      this.cameras.main.setZoom(1);
+      this.cameras.main.setZoom(0.5);
 
-      // Create minimap
-      minimap = this.cameras.add(10, 10, 200, 200).setZoom(0.05).setName('mini');
-      minimap.setBackgroundColor(0x002244);
-      minimap.scrollX = WORLD_WIDTH / 2;
-      minimap.scrollY = WORLD_HEIGHT / 2;
+      // Define building locations and data
+      const buildingData = [
+        { 
+          x: 500, 
+          y: 500, 
+          name: 'Fashion Store', 
+          categories: {
+            "Trending": [
+              { name: 'T-Shirt', description: 'Comfortable cotton t-shirt', price: '$19.99', buyLink: 'https://example.com/tshirt', upvotes: 87 },
+              { name: 'Jeans', description: 'Classic blue jeans', price: '$49.99', buyLink: 'https://example.com/jeans', upvotes: 65 }
+            ],
+            "New Arrivals": [
+              { name: 'Jacket', description: 'Warm winter jacket', price: '$89.99', buyLink: 'https://example.com/jacket', upvotes: 42 }
+            ]
+          }
+        },
+        { 
+          x: 1500, 
+          y: 1500, 
+          name: 'Shoe Shop', 
+          categories: {
+            "Trending": [
+              { name: 'Sneakers', description: 'Sporty sneakers', price: '$79.99', buyLink: 'https://example.com/sneakers', upvotes: 93 },
+              { name: 'Boots', description: 'Leather boots', price: '$99.99', buyLink: 'https://example.com/boots', upvotes: 78 }
+            ]
+          }
+        },
+        { 
+          x: 2500, 
+          y: 800, 
+          name: 'Accessories', 
+          categories: {
+            "Trending": [
+              { name: 'Sunglasses', description: 'UV protection sunglasses', price: '$29.99', buyLink: 'https://example.com/sunglasses', upvotes: 56 },
+              { name: 'Watch', description: 'Elegant wristwatch', price: '$149.99', buyLink: 'https://example.com/watch', upvotes: 71 }
+            ],
+            "Top Picks": [
+              { name: 'Wallet', description: 'Leather wallet', price: '$19.99', buyLink: 'https://example.com/wallet', upvotes: 49 }
+            ]
+          }
+        }
+      ];
+      
+      // Create buildings
+      buildings = this.physics.add.staticGroup();
+      buildingData.forEach((building) => {
+        const buildingSprite = this.add.rectangle(building.x, building.y, 100, 100, 0x0000ff, 0.5).setInteractive();
+        buildingSprite.setData('buildingInfo', building);
 
-      // Commented out car logic
-      /*
-      for (let i = 0; i < 20; i++) {
-        const x = Phaser.Math.Between(100, WORLD_WIDTH - 100);
-        const y = Phaser.Math.Between(100, WORLD_HEIGHT - 100);
-        const car = this.physics.add.image(x, y, 'car').setScale(0.2);
-        car.setVelocity(Phaser.Math.Between(-50, 50), Phaser.Math.Between(-50, 50));
-        car.setBounce(1, 1);
-        car.setCollideWorldBounds(true);
-        this.physics.add.collider(car, buildings);
-        this.physics.add.collider(car, trees);
-      }
-      */
+        // Add building name text
+        this.add
+          .text(building.x, building.y - 70, building.name, {
+            fontSize: '20px',
+            fill: '#ffffff',
+            backgroundColor: '#000000',
+            padding: { x: 5, y: 5 },
+          })
+          .setOrigin(0.5);
+
+        buildings.add(buildingSprite);
+      });
+
+      // Create the styled enter button (initially hidden)
+    enterButton = this.add.text(0, 0, 'Enter to this shop', {
+      fontSize: '24px', // Increased font size for better visibility
+      fontFamily: '"Arial", sans-serif',
+      color: '#ffffff',
+      padding: { x: 20, y: 10 },
+    })
+    .setOrigin(0.5)
+    .setVisible(false)
+    .setInteractive({ useHandCursor: true })
+    .setScrollFactor(0)
+    .setStyle({
+      backgroundColor: '#ffffff',
+      color: '#333333',
+      borderRadius: '20px',
+      padding: '15px 30px',
+      border: '2px solid #333333', // Border for more definition
+    })
+    .on('pointerdown', showShopPopup);
+
+    enterButton.on('pointerover', () => {
+      enterButton.setStyle({
+        backgroundColor: '#f0f0f0',
+        color: '#333333',
+      });
+    });
+    
+    enterButton.on('pointerout', () => {
+      enterButton.setStyle({
+        backgroundColor: '#ffffff',
+        color: '#333333',
+      });
+    });
+    
+
+
+// Resize event listener
+      this.scale.on('resize', (gameSize) => {
+        this.cameras.main.setViewport(0, 0, gameSize.width, gameSize.height);
+      });
     }
 
     function update() {
-      const speed = 200;
-
       player.setVelocity(0);
 
       if (cursors.left.isDown) {
@@ -173,21 +190,109 @@ function Playground() {
         player.setVelocityY(speed);
       }
 
-      // Update minimap position
-      minimap.scrollX = player.x;
-      minimap.scrollY = player.y;
+      const closestBuilding = getNearestBuilding();
+      if (closestBuilding && Phaser.Math.Distance.Between(player.x, player.y, closestBuilding.x, closestBuilding.y) < 150) {
+        enterButton.setPosition(game.scale.width / 2, game.scale.height - 50);
+        enterButton.setVisible(true);
+        
+      } else {
+        enterButton.setVisible(false);
+      }
+    }
+
+    function getNearestBuilding() {
+      return buildings.getChildren().reduce((closest, building) => {
+        const distance = Phaser.Math.Distance.Between(player.x, player.y, building.x, building.y);
+        return !closest || distance < closest.distance ? { distance, building } : closest;
+      }, null)?.building;
+    }
+
+    function showShopPopup() {
+      const closestBuilding = getNearestBuilding();
+      if (closestBuilding) {
+        const buildingInfo = closestBuilding.getData('buildingInfo');
+        setCurrentShop(buildingInfo);
+        setShowShop(true);
+      }
     }
 
     return () => {
       game.destroy(true);
     };
-  }, [location]);
+  }, [location, speed]);
+
+  const increaseSpeed = () => setSpeed((prevSpeed) => prevSpeed + 100);
+  const decreaseSpeed = () => setSpeed((prevSpeed) => Math.max(prevSpeed - 100, 0));
+  const resetSpeed = () => setSpeed(200);
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
       <div ref={gameRef} style={{ width: '100%', height: '100%' }} />
+      <div style={{ position: 'absolute', bottom: '20px', left: '20px', zIndex: 1000, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ background: 'rgba(255, 255, 255, 0.8)', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Speed Controls:</div>
+          <button onClick={increaseSpeed} style={buttonStyle}>+100</button>
+          <button onClick={decreaseSpeed} style={buttonStyle}>-100</button>
+          <button onClick={resetSpeed} style={buttonStyle}>Reset</button>
+        </div>
+
+        <div style={{ background: 'rgba(255, 255, 255, 0.8)', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <button onClick={() => navigate('/dashboard')} style={buttonStyle}>DASHBOARD</button>
+          <button onClick={() => navigate('/create-avatar')} style={buttonStyle}>Change Avatar</button>
+        </div>
+      </div>
+      
+      {showShop && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <GameShop shopData={currentShop} />
+          <button
+            onClick={() => setShowShop(false)}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: '#ffffff',
+              color: '#333333',
+              border: 'none',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              fontSize: '20px',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
+
+const buttonStyle = {
+  background: '#4CAF50',
+  color: 'white',
+  padding: '10px 15px',
+  border: 'none',
+  borderRadius: '5px',
+  cursor: 'pointer',
+  transition: 'background 0.3s',
+};
 
 export default Playground;

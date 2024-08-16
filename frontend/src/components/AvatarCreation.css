@@ -1,100 +1,274 @@
+/* AvatarCreation.css */
+
 .avatar-creation {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: url('D:\trys\tryfit\frontend\public\assets\bgcreateavatar.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: white;
+  font-family: 'Arial', sans-serif;
+}
+
+.avatar-creation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 800px;
+  width: 100%;
+}
+
+.avatar-preview-container {
+  margin: 20px 0;
+}
+
+#avatar-preview {
+  width: 160px;
+  height: 320px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  background-color: #000;
+}
+
+.creation-steps {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.step-container {
+  margin: 20px 0;
+}
+
+.gender-options, .clothes-options {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.gender-options button,
+.navigation-buttons button,
+.footer-button {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.gender-options button.selected,
+.navigation-buttons button:hover,
+.footer-button:hover {
+  background-color: #555;
+}
+
+.color-options {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.color-options button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.color-options button:hover {
+  transform: scale(1.1);
+}
+
+.color-options button.selected {
+  border: 2px solid white;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+  margin-top: 20px;
+}
+
+.footer-buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.progress-step {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #555;
+  margin: 0 5px;
+  transition: background-color 0.3s ease;
+}
+
+.progress-step.active {
+  background-color: white;
+}
+
+input[type="range"] {
+  width: 100%;
+  max-width: 300px;
+}
+
+input[type="color"] {
+  margin-top: 10px;
+}
+
+@media (max-width: 600px) {
+  .avatar-creation-content {
     padding: 20px;
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
   }
-  
-  .avatar-preview-container {
-    width: 160px;
-    height: 320px;
-    border: 2px solid #000;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  #avatar-preview {
-    image-rendering: pixelated;
-    width: 160px;
-    height: 320px;
-  }
-  
-  .creation-steps {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-  }
-  
-  .step-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
+
   .gender-options, .clothes-options {
-    display: flex;
-    justify-content: space-around;
+    flex-direction: column;
+  }
+
+  .gender-options button,
+  .navigation-buttons button,
+  .footer-button {
+    margin: 5px 0;
     width: 100%;
   }
-  
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
-  }
-  
-  button:hover {
-    transform: translateY(-2px);
-  }
-  
-  button.selected {
-    background-color: #4CAF50;
-    color: white;
-  }
-  
-  input[type="color"], input[type="range"] {
-    width: 100%;
-    max-width: 300px;
-    margin: 10px 0;
-  }
-  
+
   .navigation-buttons {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin-top: 20px;
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .progress-bar {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 400px;
-    margin-top: 20px;
+
+  .footer-buttons {
+    flex-direction: column;
+    align-items: center;
   }
-  
-  .progress-step {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    background-color: #ddd;
-    transition: background-color 0.3s;
+
+  .color-options {
+    flex-wrap: wrap;
   }
-  
-  .progress-step.active {
-    background-color: #4CAF50;
+
+  .color-options button {
+    margin: 5px;
   }
+}
+
+/* Additional styles for better UI */
+
+h3 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.clothes-options {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.clothes-options > div {
+  width: 45%;
+}
+
+.submit-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px 24px;
+  font-size: 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #45a049;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.avatar-preview-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.step-container {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.avatar-creation-content {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.step-container {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Hover effects */
+.gender-options button:hover,
+.navigation-buttons button:hover,
+.footer-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Transitions */
+.gender-options button,
+.navigation-buttons button,
+.footer-button,
+.color-options button,
+.submit-button {
+  transition: all 0.3s ease;
+}
