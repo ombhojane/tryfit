@@ -74,22 +74,22 @@ function Playground() {
       // Define building locations and data
       const buildingData = [
         { 
-          x: 500, 
-          y: 500, 
+          x: 1720, 
+          y: 1600, 
           name: 'Fashion Store', 
           categories: {
             "Trending": [
-              { name: 'T-Shirt', description: 'Comfortable cotton t-shirt', price: '$19.99', buyLink: 'https://example.com/tshirt', upvotes: 87, image: 'https://tse4.mm.bing.net/th?id=OIP.omIRA7NIb8Gj-OTVvW6XggHaH8&pid=Apihttps://i.pinimg.com/originals/b9/59/cc/b959cce534c8661e181c646c10013922.jpg' },
-              { name: 'Jeans', description: 'Classic blue jeans', price: '$49.99', buyLink: 'https://image.harrods.com/16/62/57/71/16625771_32834699_2048.jpg' }
+              { name: 'T-Shirt', description: 'Comfortable cotton t-shirt', price: '$19.99', buyLink: 'https://www.amazon.in/Amazon-Brand-Symbol-Mens-AW17MPCP9_XL_Tango/dp/B073X33F63', upvotes: 382, image: 'https://tse4.mm.bing.net/th?id=OIP.omIRA7NIb8Gj-OTVvW6XggHaH8&pid=Apihttps://i.pinimg.com/originals/b9/59/cc/b959cce534c8661e181c646c10013922.jpg' },
+              { name: 'Jeans', description: 'Classic blue jeans', price: '$49.99', buyLink: 'https://www.amazon.in/Louis-Philippe-Mens-Jeans-LRDNCSLPL62630_Navy/dp/B0D4Z323HB' , upvotes: 87, image: 'https://m.media-amazon.com/images/I/61r7htRqqDL._SY879_.jpg' },
             ],
             "New Arrivals": [
-              { name: 'Jacket', description: 'Warm winter jacket', price: '$89.99', buyLink: 'https://image.harrods.com/16/62/57/71/16625771_32834699_2048.jpg' }
+              { name: 'Jacket', description: 'Warm winter jacket', price: '$89.99', buyLink: 'https://www.amazon.in/Pomo-Z-Polyester-Casual-Stylish-Removable/dp/B0CHHRTWGW/' , upvotes: 125, image: 'https://m.media-amazon.com/images/I/71-ngFIxUlL._SX679_.jpg' }
             ]
           }
         },
         { 
-          x: 1500, 
-          y: 1500, 
+          x: 1550, 
+          y: 1650, 
           name: 'Shoe Shop', 
           categories: {
             "Trending": [
@@ -99,8 +99,8 @@ function Playground() {
           }
         },
         { 
-          x: 2500, 
-          y: 800, 
+          x: 2240, 
+          y: 740, 
           name: 'Accessories', 
           categories: {
             "Trending": [
