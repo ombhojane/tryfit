@@ -84,7 +84,7 @@ function AvatarCreation() {
     }
   
   
-    ctx.fillStyle = avatarFeatures.skinTone;
+  ctx.fillStyle = avatarFeatures.skinTone;
   for (let y = 0; y < 10; y++) {
     for (let x = 5; x < 11; x++) {
       ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
@@ -120,7 +120,7 @@ function AvatarCreation() {
       }
 
     }
-    
+
     ctx.fillStyle = avatarFeatures.eyeColor;
     ctx.fillRect(6 * pixelSize, 5 * pixelSize, pixelSize, pixelSize);
     ctx.fillRect(9 * pixelSize, 5 * pixelSize, pixelSize, pixelSize);
@@ -133,7 +133,7 @@ function AvatarCreation() {
     if (avatarPreview) {
       avatarPreview.src = renderPixelatedAvatar();
     }
-  }, [avatarFeatures]);
+  }, [avatarFeatures], 7);
 
   const handleLogout = async () => {
     await signOut();

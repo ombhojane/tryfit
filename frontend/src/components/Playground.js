@@ -79,11 +79,11 @@ function Playground() {
           name: 'Fashion Store', 
           categories: {
             "Trending": [
-              { name: 'T-Shirt', description: 'Comfortable cotton t-shirt', price: '$19.99', buyLink: 'https://example.com/tshirt', upvotes: 87 },
-              { name: 'Jeans', description: 'Classic blue jeans', price: '$49.99', buyLink: 'https://example.com/jeans', upvotes: 65 }
+              { name: 'T-Shirt', description: 'Comfortable cotton t-shirt', price: '$19.99', buyLink: 'https://example.com/tshirt', upvotes: 87, image: 'https://tse4.mm.bing.net/th?id=OIP.omIRA7NIb8Gj-OTVvW6XggHaH8&pid=Apihttps://i.pinimg.com/originals/b9/59/cc/b959cce534c8661e181c646c10013922.jpg' },
+              { name: 'Jeans', description: 'Classic blue jeans', price: '$49.99', buyLink: 'https://image.harrods.com/16/62/57/71/16625771_32834699_2048.jpg' }
             ],
             "New Arrivals": [
-              { name: 'Jacket', description: 'Warm winter jacket', price: '$89.99', buyLink: 'https://example.com/jacket', upvotes: 42 }
+              { name: 'Jacket', description: 'Warm winter jacket', price: '$89.99', buyLink: 'https://image.harrods.com/16/62/57/71/16625771_32834699_2048.jpg' }
             ]
           }
         },
@@ -113,7 +113,7 @@ function Playground() {
           }
         }
       ];
-      
+
       // Create buildings
       buildings = this.physics.add.staticGroup();
       buildingData.forEach((building) => {

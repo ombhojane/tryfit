@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
 import styled from 'styled-components';
+import React, { useState } from 'react';
+import axios from 'axios';
+
 
 const GameShopContainer = styled.div`
   font-family: 'Roboto', sans-serif;
@@ -260,82 +262,279 @@ const ProductViewContainer = styled.div`
   overflow-y: auto;
 `;
 
+const TryOnButton = styled.button`
+  background-color: #3498db;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 15px;
+
+  &:hover {
+    background-color: #2980b9;
+  }
+`;
+
+const TryOnModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const TryOnContent = styled.div`
+  background-color: #f9f9f9;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 800px;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const TryOnTitle = styled.h2`
+  text-align: center;
+  color: #2c3e50;
+  font-size: 24px;
+  margin-bottom: 20px;
+`;
+
+const TryOnImageContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex: 1;
+`;
+
+const TryOnImage = styled.img`
+  max-width: 45%;
+  max-height: 80%;
+  object-fit: contain;
+`;
+
+const UploadButton = styled.label`
+  background-color: #3498db;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  display: inline-block;
+  margin-top: 20px;
+
+  &:hover {
+    background-color: #2980b9;
+  }
+`;
+
+const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+const LoadingSpinner = styled.div`
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
 const GameShop = ({ shopData }) => {
-  const [selectedCategory, setSelectedCategory] = useState('Trending');
-  const [selectedProduct, setSelectedProduct] = useState(null);
-
-  const allProducts = Object.values(shopData.categories).flat();
-  const trendingProducts = allProducts.sort((a, b) => b.upvotes - a.upvotes).slice(0, 5);
-
-  const displayProducts = selectedCategory === 'Trending' 
-    ? trendingProducts 
-    : shopData.categories[selectedCategory] || [];
-
-  const handleBackToHome = () => {
-    setSelectedProduct(null);
-  };
-
-      return (
-        <GameShopContainer>
-          <ShopTitle>{shopData.name}</ShopTitle>
-          <ShopContent>
-            <Sidebar>
-              <SectionTitle>Categories</SectionTitle>
-              <CategoryList>
-                <CategoryItem 
-                  onClick={() => setSelectedCategory('Trending')}
-                  active={selectedCategory === 'Trending'}
-                >
-                  Trending
-                </CategoryItem>
-                {Object.keys(shopData.categories).map((category) => (
-                  <CategoryItem 
-                    key={category} 
-                    onClick={() => setSelectedCategory(category)}
-                    active={selectedCategory === category}
-                  >
-                    {category}
-                  </CategoryItem>
-                ))}
-              </CategoryList>
-            </Sidebar>
-            {selectedProduct ? (
-              <ProductViewContainer>
-                <BackButton onClick={handleBackToHome}>← Back to Products</BackButton>
-                <ProductViewHeader>
-                  <ProductViewImage>[Product Image]</ProductViewImage>
-                  <ProductViewInfo>
-                    <ProductViewTitle>{selectedProduct.name}</ProductViewTitle>
-                    <ProductViewDescription>{selectedProduct.description}</ProductViewDescription>
-                    <ProductViewDetails>
-                      <ProductViewPrice>{selectedProduct.price}</ProductViewPrice>
-                      <ProductViewUpvotes>
-                        👍 {selectedProduct.upvotes} Upvotes
-                      </ProductViewUpvotes>
-                    </ProductViewDetails>
-                    <BuyButton href={selectedProduct.buyLink} target="_blank" rel="noopener noreferrer">
-                      Buy Now
-                    </BuyButton>
-                  </ProductViewInfo>
-                </ProductViewHeader>
-              
-            
-              </ProductViewContainer>
-            ) : (
-              <ProductGrid>
-                {displayProducts.map((product) => (
-                  <ProductCard key={product.name} onClick={() => setSelectedProduct(product)}>
-                    <ProductImage>[Product Image]</ProductImage>
-                    <ProductName>{product.name}</ProductName>
-                    <ProductPrice>{product.price}</ProductPrice>
-                  </ProductCard>
-                ))}
-              </ProductGrid>
-            )}
-          </ShopContent>
-        </GameShopContainer>
-      );
+    const [selectedCategory, setSelectedCategory] = useState('Trending');
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [showTryOn, setShowTryOn] = useState(false);
+    const [userImage, setUserImage] = useState(null);
+    const [tryOnResult, setTryOnResult] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+  
+    const allProducts = Object.values(shopData.categories).flat();
+    const trendingProducts = allProducts.sort((a, b) => b.upvotes - a.upvotes).slice(0, 5);
+  
+    const displayProducts = selectedCategory === 'Trending' 
+      ? trendingProducts 
+      : shopData.categories[selectedCategory] || [];
+  
+    const handleBackToHome = () => {
+      setSelectedProduct(null);
     };
+  
+    const handleTryOn = () => {
+      setShowTryOn(true);
+    };
+  
+    const handleFileUpload = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => setUserImage(e.target.result);
+        reader.readAsDataURL(file);
+      }
+    };
+  
+    const handleVirtualTryOn = async () => {
+      if (!userImage || !selectedProduct.image) {
+        alert('Please upload your photo and select a product');
+        return;
+      }
     
-
-export default GameShop;
+      setIsLoading(true);
+    
+      try {
+        // Convert the userImage (data URL) to a Blob
+        const modelImageBlob = await fetch(userImage).then((r) => r.blob());
+    
+        // Convert the selectedProduct.image (URL) to a Blob
+        const garmentImageBlob = await fetch(selectedProduct.image).then((r) => r.blob());
+    
+        const formData = new FormData();
+        formData.append('humanImage', modelImageBlob, 'human-image.jpg');
+        formData.append('garmentImage', garmentImageBlob, 'garment-image.jpg');
+    
+        const response = await axios.post('http://localhost:5000/api/tryon', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+    
+        if (response.data && response.data.imageUrl) {
+          // Display the image without changing the URL
+          setTryOnResult(response.data.imageUrl);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (error) {
+        console.error('Try-on error:', error);
+        if (error.response) {
+          alert(`Server error: ${error.response.data.error || 'Unknown error'}`);
+        } else if (error.request) {
+          alert('No response received from server. Please try again.');
+        } else {
+          alert('Error setting up the request. Please try again.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+  
+    return (
+      <GameShopContainer>
+        <ShopTitle>{shopData.name}</ShopTitle>
+        <ShopContent>
+          <Sidebar>
+            <SectionTitle>Categories</SectionTitle>
+            <CategoryList>
+              <CategoryItem 
+                onClick={() => setSelectedCategory('Trending')}
+                active={selectedCategory === 'Trending'}
+              >
+                Trending
+              </CategoryItem>
+              {Object.keys(shopData.categories).map((category) => (
+                <CategoryItem 
+                  key={category} 
+                  onClick={() => setSelectedCategory(category)}
+                  active={selectedCategory === category}
+                >
+                  {category}
+                </CategoryItem>
+              ))}
+            </CategoryList>
+          </Sidebar>
+          {selectedProduct ? (
+            <ProductViewContainer>
+              <BackButton onClick={handleBackToHome}>← Back to Products</BackButton>
+              <ProductViewHeader>
+                <ProductViewImage>
+                  <img src={selectedProduct.image} alt={selectedProduct.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                </ProductViewImage>
+                <ProductViewInfo>
+                  <ProductViewTitle>{selectedProduct.name}</ProductViewTitle>
+                  <ProductViewDescription>{selectedProduct.description}</ProductViewDescription>
+                  <ProductViewDetails>
+                    <ProductViewPrice>{selectedProduct.price}</ProductViewPrice>
+                    <ProductViewUpvotes>
+                      👍 {selectedProduct.upvotes} Upvotes
+                    </ProductViewUpvotes>
+                  </ProductViewDetails>
+                  <BuyButton href={selectedProduct.buyLink} target="_blank" rel="noopener noreferrer">
+                    Buy Now
+                  </BuyButton>
+                  <TryOnButton onClick={handleTryOn}>Try On You</TryOnButton>
+                </ProductViewInfo>
+              </ProductViewHeader>
+            </ProductViewContainer>
+          ) : (
+            <ProductGrid>
+              {displayProducts.map((product) => (
+                <ProductCard key={product.name} onClick={() => setSelectedProduct(product)}>
+                  <ProductImage>
+                    <img src={product.image} alt={product.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                  </ProductImage>
+                  <ProductName>{product.name}</ProductName>
+                  <ProductPrice>{product.price}</ProductPrice>
+                </ProductCard>
+              ))}
+            </ProductGrid>
+          )}
+        </ShopContent>
+        {showTryOn && (
+          <TryOnModal>
+            <TryOnContent>
+              <TryOnTitle>Try On: {selectedProduct.name}</TryOnTitle>
+              <TryOnImageContainer>
+                <TryOnImage src={selectedProduct.image} alt={selectedProduct.name} />
+                <TryOnImage src={userImage || 'D:\trys\tryfit\frontend\public\assets\building1.png'} alt="User" />
+              </TryOnImageContainer>
+              <UploadButton>
+                Upload Your Photo
+                <HiddenFileInput type="file" onChange={handleFileUpload} accept="image/*" />
+              </UploadButton>
+              <TryOnButton onClick={handleVirtualTryOn} disabled={isLoading}>
+                {isLoading ? 'Processing...' : 'Let\'s Try On'}
+              </TryOnButton>
+              {isLoading && <LoadingSpinner />}
+              {tryOnResult && (
+                <TryOnImage src={tryOnResult} alt="Try-on Result" />
+              )}
+              <TryOnButton onClick={() => {
+                setShowTryOn(false);
+                setTryOnResult(null);
+                setUserImage(null);
+              }}>Close</TryOnButton>
+            </TryOnContent>
+          </TryOnModal>
+        )}
+        {/* Display the try-on result below the input images */}
+        {tryOnResult && (
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            <h3>Your Try-On Result</h3>
+            <img src={tryOnResult} alt="Try-On Result" style={{ maxWidth: '100%', height: 'auto' }} />
+          </div>
+        )}
+      </GameShopContainer>
+    );
+  };
+  
+  export default GameShop;
+  
